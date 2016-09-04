@@ -1,20 +1,29 @@
-from distutils.core import setup
+from mediasync import __version__
+from setuptools import setup, find_packages
+import os
 
-long_description = open('README.md').read()
+f = open(os.path.join(os.path.dirname(__file__), 'README.rst'))
+readme = f.read()
+f.close()
 
 setup(
     name='django-mediasync',
-    version="1.0",
-    package_dir={'mediasync': 'mediasync'},
-    packages=['mediasync','mediasync.clients','mediasync.management',
-              'mediasync.management.commands','mediasync.templatetags',
-              'mediasync.utils'],
+    version=__version__,
     description='Django static media development and distribution tools',
+    long_description=readme,
     author='Jeremy Carbaugh',
     author_email='jcarbaugh@sunlightfoundation.com',
-    license='BSD License',
     url='http://github.com/sunlightlabs/django-mediasync/',
-    long_description=long_description,
+    packages=find_packages(),
+    package_data={
+        'mediasync': [
+            'tests/media/*/*',
+        ]
+    },
+    install_requires=[
+        'boto',
+    ],
+    license='BSD License',
     platforms=["any"],
     classifiers=[
         'Development Status :: 4 - Beta',
