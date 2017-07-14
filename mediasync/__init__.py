@@ -1,5 +1,8 @@
 import base64
-import cStringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import gzip
 import hashlib
 import mimetypes
@@ -31,7 +34,7 @@ def checksum(data):
     return (hexdigest, b64digest)
 
 def compress(s):
-    zbuf = cStringIO.StringIO()
+    zbuf = StringIO()
     zfile = gzip.GzipFile(mode='wb', compresslevel=6, fileobj=zbuf)
     zfile.write(s)
     zfile.close()
@@ -84,7 +87,7 @@ def combine_files(joinfile, sourcefiles, client):
         # By-pass this file since we only join CSS and JS.
         return None
 
-    buffer = cStringIO.StringIO()
+    buffer = StringIO()
 
     for sourcefile in sourcefiles:
         sourcepath = os.path.join(client.media_root, dirname, sourcefile)
@@ -122,7 +125,7 @@ def sync(client=None, force=False, verbose=True):
     # sync joined media
     #
 
-    for joinfile, sourcefiles in msettings['JOINED'].iteritems():
+    for joinfile, sourcefiles in msettings['JOINED'].items():
 
         filedata = combine_files(joinfile, sourcefiles, client)
         if filedata is None:
@@ -138,7 +141,7 @@ def sync(client=None, force=False, verbose=True):
 
         if client.process_and_put(filedata, content_type, remote_path, force=force):
             if verbose:
-                print "[%s] %s" % (content_type, remote_path)
+                print('[{}] {}'.format(content_type, remote_path))
 
     #
     # sync static media
@@ -165,7 +168,7 @@ def sync(client=None, force=False, verbose=True):
 
                 if client.process_and_put(filedata, content_type, remote_path, force=force):
                     if verbose:
-                        print "[%s] %s" % (content_type, remote_path)
+                        print('[{}] {}'.format(content_type, remote_path))
 
     # send post-sync signal while client is still open
     post_sync.send(sender=client)

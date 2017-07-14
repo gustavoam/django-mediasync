@@ -1,7 +1,10 @@
 from django.core.exceptions import ImproperlyConfigured
 from importlib import import_module
 from mediasync.conf import msettings
-from urlparse import urlparse
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 def client():
     backend_name = msettings['BACKEND']
@@ -13,7 +16,7 @@ def load_backend(backend_name):
     try:
         backend = import_module(backend_name)
         return backend.Client()
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured(("%s is not a valid mediasync backend. \n" +
             "Error was: %s") % (backend_name, e))
 
@@ -30,12 +33,16 @@ class BaseClient(object):
 
         self.processors = []
         for proc in msettings['PROCESSORS']:
-
-            if isinstance(proc, basestring):
+            try:
+                proc_is_str = isinstance(proc, basestring)
+            except NameError:
+                proc_is_str = isinstance(proc, str)
+            if proc_is_str:
                 try:
                     dot = proc.rindex('.')
                 except ValueError:
-                    raise exceptions.ImproperlyConfigured, '%s isn\'t a processor module' % (proc,)
+                    raise exceptions.ImproperlyConfigured(
+                        '%s isn\'t a processor module' % (proc,))
                 module, attr = proc[:dot], proc[dot+1:]
                 module = import_module(module)
                 proc = getattr(module, attr, None)

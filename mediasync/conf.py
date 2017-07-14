@@ -21,7 +21,7 @@ _settings = {
 class Settings(object):
     
     def __init__(self, conf):
-        for k, v in conf.iteritems():
+        for k, v in conf.items():
             self[k] = v
     
     def __delitem__(self, name):
